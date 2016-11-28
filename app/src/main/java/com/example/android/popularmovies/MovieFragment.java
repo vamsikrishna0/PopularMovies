@@ -44,6 +44,8 @@ public class MovieFragment extends Fragment {
 
     MovieAdapter mAdapter;
     private final String ADAPTER = "adapter";
+    String sortBy;
+    boolean toggleSortOrder = true;
     public MovieFragment() {
         // Required empty public constructor
     }
@@ -55,13 +57,15 @@ public class MovieFragment extends Fragment {
 
         // Use Custom ArrayAdapter and a model object to store data for each movie entry(returned from the API)
         // Preserve the adapter by saving it to savedInstanceState by calling onSaveInstanceState
-        if(savedInstanceState != null){
-            mAdapter = (MovieAdapter) savedInstanceState.getSerializable(ADAPTER);
-        }else{
-            // Call the updateMovies() method which calls the API and returns the view
-            Log.v("MovieFragment", "First call after start of activity");
-            updateMovies();
-        }
+
+//        if(savedInstanceState != null){
+//            mAdapter = (MovieAdapter) savedInstanceState.getSerializable(ADAPTER);
+//        }else{
+
+        sortBy = getString(R.string.pref_popularity);
+        updateMovies(sortBy);
+
+//        }
 
     }
 
@@ -74,29 +78,29 @@ public class MovieFragment extends Fragment {
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
 
-        if(id == R.id.action_sort_order){
-            startActivity(new Intent(this.getActivity(), SettingsActivity.class));
-        }else if(id == R.id.action_sort_order){
-
+        if(id == R.id.action_sort_order && toggleSortOrder == false){
+            toggleSortOrder = true;
+            sortBy = getString(R.string.pref_popularity);
+            updateMovies(sortBy);
+        }else if(id == R.id.action_sort_order && toggleSortOrder == true){
+            toggleSortOrder = false;
+            sortBy = getString(R.string.pref_top_rated);
+            updateMovies(sortBy);
         }
 
-        return super.onOptionsItemSelected(item);
+        GridView grid = (GridView) getActivity().findViewById(R.id.movie_image_gridview);
+        grid.setAdapter(mAdapter);
+
+        return true;
     }
 
-    @Override
-    public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
+//    @Override
+//    public void onSaveInstanceState(Bundle outState) {
+//        super.onSaveInstanceState(outState);
+//
+//        outState.putSerializable(ADAPTER, mAdapter);
+//    }
 
-        outState.putSerializable(ADAPTER, mAdapter);
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        Log.v("MovieFragment", "onResume called");
-
-        updateMovies();
-    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -110,17 +114,15 @@ public class MovieFragment extends Fragment {
         return returnView;
     }
 
-    public void updateMovies() {
-        mAdapter = new MovieAdapter(getContext(), new ArrayList<Movie>());
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
-        String sortBy = prefs.getString(getString(R.string.pref_sort_order_key), getString(R.string.pref_sort_order_default));
+    public void updateMovies(String sortBy) {
+        mAdapter = new MovieAdapter(getActivity(), new ArrayList<Movie>());
         new FetchMovieTask().execute(sortBy);
     }
 
     public class FetchMovieTask extends AsyncTask<String, Void, ArrayList<Movie>> {
         @Override
         protected ArrayList<Movie> doInBackground(String... strings) {
-            String BASE_URI = "https://api.themoviedb.org/3/discover/movie";
+            String BASE_URI = "https://api.themoviedb.org/3/movie";
             String API_KEY = "api_key";
             String LANGUAGE = "language";
             String PAGE = "page";
@@ -128,8 +130,6 @@ public class MovieFragment extends Fragment {
 
             String language = "en-US";
 
-            //The setting is passed as input
-            String sortBy = getString(R.string.pref_sort_order_default);
             Uri uri = Uri.parse(BASE_URI).buildUpon()
                     .appendPath(strings[0])
                     .appendQueryParameter(API_KEY, BuildConfig.TMDB_API_KEY)
@@ -193,20 +193,7 @@ public class MovieFragment extends Fragment {
 
                     results.add(movieObject);
                 }
-                if(strings[0].equals(getString(R.string.top_rated)))
-                Collections.sort(results, new Comparator<Movie>() {
-                    @Override
-                    public int compare(Movie movie, Movie t1) {
-                        double diff = movie.getVoteAverage() - t1.getVoteAverage();
-                        if (diff == 0)
-                            return 0;
-                        else if (diff < 0)
-                            return -1;
-                        else if (diff > 0)
-                            return 1;
-                        return 0;
-                    }
-                });
+
             } catch (java.io.IOException e) {
                 e.printStackTrace();
             } catch (JSONException e) {

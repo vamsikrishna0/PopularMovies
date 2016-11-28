@@ -5,11 +5,8 @@
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="action_sort_order">Sort By</string>
 
-    <string name="popularity">popularity.desc</string>
-    <string name="pref_sort_order_default">popularity.desc</string>
-    <string name="top_rated">vote_average.desc</string>
-    <string name="pref_sort_order_key">sort_order</string>
     <string name="pref_sort_order_label">Sort By</string>
     <string name="pref_popularity">popular</string>
     <string name="pref_top_rated">top_rated</string>
+    <string name="pref_toggle_sort">Toggle Sort By</string>
 </resources>
