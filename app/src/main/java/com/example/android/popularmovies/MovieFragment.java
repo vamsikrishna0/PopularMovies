@@ -1,12 +1,18 @@
 package com.example.android.popularmovies;
 
 
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.GridView;
@@ -24,6 +30,9 @@ import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 
 
@@ -42,24 +51,51 @@ public class MovieFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
 
         // Use Custom ArrayAdapter and a model object to store data for each movie entry(returned from the API)
-
+        // Preserve the adapter by saving it to savedInstanceState by calling onSaveInstanceState
         if(savedInstanceState != null){
             mAdapter = (MovieAdapter) savedInstanceState.getSerializable(ADAPTER);
         }else{
             // Call the updateMovies() method which calls the API and returns the view
+            Log.v("MovieFragment", "First call after start of activity");
             updateMovies();
         }
 
     }
 
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.options_sort_order, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+
+        if(id == R.id.action_sort_order){
+            startActivity(new Intent(this.getActivity(), SettingsActivity.class));
+        }else if(id == R.id.action_sort_order){
+
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
 
         outState.putSerializable(ADAPTER, mAdapter);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        Log.v("MovieFragment", "onResume called");
+
+        updateMovies();
     }
 
     @Override
@@ -76,25 +112,28 @@ public class MovieFragment extends Fragment {
 
     public void updateMovies() {
         mAdapter = new MovieAdapter(getContext(), new ArrayList<Movie>());
-        new FetchMovieTask().execute();
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        String sortBy = prefs.getString(getString(R.string.pref_sort_order_key), getString(R.string.pref_sort_order_default));
+        new FetchMovieTask().execute(sortBy);
     }
 
-    public class FetchMovieTask extends AsyncTask<Void, Void, ArrayList<Movie>> {
+    public class FetchMovieTask extends AsyncTask<String, Void, ArrayList<Movie>> {
         @Override
-        protected ArrayList<Movie> doInBackground(Void... voids) {
+        protected ArrayList<Movie> doInBackground(String... strings) {
             String BASE_URI = "https://api.themoviedb.org/3/discover/movie";
             String API_KEY = "api_key";
             String LANGUAGE = "language";
-            String SORT_BY = "sort_by";
             String PAGE = "page";
             //api_key=29b5c38bd9cb290af42a02bf51e15193&language=en-US&sort_by=popularity.desc&page=1
 
             String language = "en-US";
-            String sortBy = "popularity.desc";
+
+            //The setting is passed as input
+            String sortBy = getString(R.string.pref_sort_order_default);
             Uri uri = Uri.parse(BASE_URI).buildUpon()
+                    .appendPath(strings[0])
                     .appendQueryParameter(API_KEY, BuildConfig.TMDB_API_KEY)
                     .appendQueryParameter(LANGUAGE, language)
-                    .appendQueryParameter(SORT_BY, sortBy)
                     .appendQueryParameter(PAGE, "1")
                     .build();
 
@@ -154,6 +193,20 @@ public class MovieFragment extends Fragment {
 
                     results.add(movieObject);
                 }
+                if(strings[0].equals(getString(R.string.top_rated)))
+                Collections.sort(results, new Comparator<Movie>() {
+                    @Override
+                    public int compare(Movie movie, Movie t1) {
+                        double diff = movie.getVoteAverage() - t1.getVoteAverage();
+                        if (diff == 0)
+                            return 0;
+                        else if (diff < 0)
+                            return -1;
+                        else if (diff > 0)
+                            return 1;
+                        return 0;
+                    }
+                });
             } catch (java.io.IOException e) {
                 e.printStackTrace();
             } catch (JSONException e) {
@@ -167,9 +220,12 @@ public class MovieFragment extends Fragment {
 
         @Override
         protected void onPostExecute(ArrayList<Movie> movies) {
+
             if (movies != null) {
                 mAdapter.clear();
                 mAdapter.addAll(movies);
+            }else{
+                Log.v("MovieFragment", "Data added to adapter is null");
             }
         }
     }
