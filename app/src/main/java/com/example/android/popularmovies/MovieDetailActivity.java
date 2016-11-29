@@ -28,6 +28,6 @@ public class MovieDetailActivity extends AppCompatActivity {
         originalTitle.setText("Original Title: " + movie.getOriginalTitle());
         overview.setText("Overview: " + movie.getOverview());
         voteAverage.setText("User Rating: " + String.valueOf(movie.getVoteAverage()));
-        releaseDate.setText("Date: " + movie.getReleaseDate().toString());
+        releaseDate.setText("Date: " + movie.getReadableDateString());
     }
 }

@@ -127,6 +127,8 @@ public class MovieFragment extends Fragment {
             String LANGUAGE = "language";
             String PAGE = "page";
             //api_key=29b5c38bd9cb290af42a02bf51e15193&language=en-US&sort_by=popularity.desc&page=1
+            //https://api.themoviedb.org/3/movie/popular?api_key=<<api_key>>&language=en-US
+            //https://api.themoviedb.org/3/movie/top_rated?api_key=<<api_key>>&language=en-US
 
             String language = "en-US";
 
@@ -146,8 +148,6 @@ public class MovieFragment extends Fragment {
             ArrayList<Movie> results = new ArrayList<>();
             try {
                 URL url = new URL(uri.toString());
-                Log.v("MovieFragment", uri.toString());
-                Log.v("MovieFragment", url.toString());
 
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setRequestMethod("GET");
@@ -211,8 +211,6 @@ public class MovieFragment extends Fragment {
             if (movies != null) {
                 mAdapter.clear();
                 mAdapter.addAll(movies);
-            }else{
-                Log.v("MovieFragment", "Data added to adapter is null");
             }
         }
     }

@@ -1,6 +1,7 @@
 package com.example.android.popularmovies;
 
 import java.io.Serializable;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class Movie implements Serializable {
@@ -42,5 +43,12 @@ public class Movie implements Serializable {
 
     public double getPopularity() {
         return popularity;
+    }
+
+    public String getReadableDateString() {
+        // Because the API returns a unix timestamp (measured in seconds),
+        // it must be converted to milliseconds in order to be converted to valid date.
+        SimpleDateFormat shortenedDateFormat = new SimpleDateFormat("MM-dd-yyyy");
+        return shortenedDateFormat.format(releaseDate);
     }
 }
