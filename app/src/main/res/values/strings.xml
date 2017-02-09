@@ -11,4 +11,11 @@
 
     <string name="pref_sort_order_default">popular</string>
     <string name="favorites">favorites</string>
+    <string name="movie_image">movie image</string>
+    <string name="reviews">Reviews</string>
+    <string name="trailers">Trailers</string>
+    <string name="original_title">Original Title: </string>
+    <string name="overview">Overview: </string>
+    <string name="user_rating">User Rating: </string>
+    <string name="date">Date: </string>
 </resources>

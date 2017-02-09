@@ -11,15 +11,13 @@ import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.AsyncTaskLoader;
 import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
-import android.test.suitebuilder.TestMethod;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup.LayoutParams;
 import android.widget.ImageView;
-import android.widget.ListView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.example.android.popularmovies.adapters.TrailerAdapter;
-import com.example.android.popularmovies.adapters.ReviewAdapter;
 import com.example.android.popularmovies.data.Movie;
 import com.example.android.popularmovies.data.Trailer;
 import com.example.android.popularmovies.data.cp.FavouriteContentProvider;
@@ -38,8 +36,6 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 
-import static android.R.attr.id;
-
 public class MovieDetailActivity extends AppCompatActivity implements LoaderCallbacks<MovieDetailActivity.MovieDetail> {
     final String IMAGE_BASE_URI = "http://image.tmdb.org/t/p/w185/";
     final String DETAIL = "detail";
@@ -47,18 +43,14 @@ public class MovieDetailActivity extends AppCompatActivity implements LoaderCall
     public TextView mOverview;
     public TextView mVoteAverage;
     public TextView mReleaseDate;
-    public ListView mReviewListView;
-    public ListView mTrailerListView;
+    public LinearLayout mTrailersView;
+    public LinearLayout mReviewsView;
     public ImageView mPoster;
-    public ReviewAdapter mReviewAdapter;
-    public TrailerAdapter mTrailerAdapter;
     public static Movie mMovie;
     public static final String ID_KEY = "id";
     public static int LOADER_ID = 356;
 
     public static final String SAVEDINSTANCE_MOVIE = "movie";
-    public static final String SAVEDINSTANCE_TRAILER = "trailers";
-    public static final String SAVEDINSTANCE_REVIEWS = "reviews";
     public static final String TAG = MovieDetailActivity.class.getSimpleName();
 
     @Override
@@ -72,8 +64,8 @@ public class MovieDetailActivity extends AppCompatActivity implements LoaderCall
         mVoteAverage = (TextView) findViewById(R.id.detail_vote_average);
         mReleaseDate = (TextView) findViewById(R.id.detail_release_date);
         mPoster = (ImageView) findViewById(R.id.detail_poster);
-        mReviewListView = (ListView) findViewById(R.id.detail_reviews_listview);
-        mTrailerListView = (ListView) findViewById(R.id.detail_trailers_listview);
+        mTrailersView = (LinearLayout) findViewById(R.id.detail_trailers_ll);
+        mReviewsView = (LinearLayout) findViewById(R.id.detail_reviews_ll);
 
         //Check for savedInstanceState
         if (savedInstanceState == null) {
@@ -82,32 +74,53 @@ public class MovieDetailActivity extends AppCompatActivity implements LoaderCall
             queryBundle.putString(ID_KEY, mMovie.getId());
             getSupportLoaderManager().initLoader(LOADER_ID, queryBundle, this);
 
-            mReviewAdapter = new ReviewAdapter(this, new ArrayList<String>());
-            mTrailerAdapter = new TrailerAdapter(this, new ArrayList<Trailer>());
-
         } else {
             mMovie = (Movie) savedInstanceState.getSerializable(SAVEDINSTANCE_MOVIE);
-            mReviewAdapter = (ReviewAdapter) savedInstanceState.getSerializable(SAVEDINSTANCE_REVIEWS);
-            mTrailerAdapter = (TrailerAdapter) savedInstanceState.getSerializable(SAVEDINSTANCE_TRAILER);
+            updateUI();        //Updating data
         }
-        TextView textView = new TextView(this);
-
-        //Updating data
-        updateUI();
-
         //Getting the FAB and setting an onClickListener
         setUpFab();
     }
 
     private void updateUI(){
-        mReviewListView.setAdapter(mReviewAdapter);
-        mTrailerListView.setAdapter(mTrailerAdapter);
+        LayoutParams layoutParams = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
+        for(String review: mMovie.getReviews()){
+            TextView textView = new TextView(this);
+            textView.setText(review);
+            textView.setLayoutParams(layoutParams);
+            Log.v(TAG, "Reviews set");
+            mReviewsView.addView(textView);
+        }
+        for(final Trailer trailer: mMovie.getTrailers()){
+            TextView trailerText = new TextView(this);
+            trailerText.setText(trailer.getName());
+            trailerText.setTextSize(26);
+            trailerText.setTextColor(getResources().getColor(R.color.colorPrimary));
+            trailerText.setPadding(20, 0, 0, 4);
+            trailerText.setLayoutParams(layoutParams);
+            Log.v(TAG, trailer.getName());
+            trailerText.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    String id = trailer.getId();
+                    Intent appIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("vnd.youtube:" + id));
+                    if(appIntent.resolveActivity(getPackageManager()) != null){
+                        startActivity(appIntent);
+                    }
 
+                }
+            });
+            mTrailersView.addView(trailerText);
+        }
         Picasso.with(this).load(IMAGE_BASE_URI + mMovie.getImageUri()).resize(700, 400).into(mPoster);
-        mOriginalTitle.setText("Original Title: " + mMovie.getOriginalTitle());
-        mOverview.setText("Overview: " + mMovie.getOverview());
-        mVoteAverage.setText("User Rating: " + String.valueOf(mMovie.getVoteAverage()));
-        mReleaseDate.setText("Date: " + mMovie.getReadableDateString());
+        String text = getString(R.string.original_title) + mMovie.getOriginalTitle();
+        mOriginalTitle.setText(text);
+        text = getString(R.string.overview) + mMovie.getOverview();
+        mOverview.setText(text);
+        text = getString(R.string.user_rating) + mMovie.getVoteAverage();
+        mVoteAverage.setText(text);
+        text = getString(R.string.date) + mMovie.getReleaseDate();
+        mReleaseDate.setText(text);
     }
 
     private void setUpFab(){
@@ -159,8 +172,6 @@ public class MovieDetailActivity extends AppCompatActivity implements LoaderCall
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putSerializable(SAVEDINSTANCE_MOVIE, mMovie);
-        outState.putSerializable(SAVEDINSTANCE_REVIEWS, mReviewAdapter);
-        outState.putSerializable(SAVEDINSTANCE_TRAILER, mTrailerAdapter);
     }
 
     /*
@@ -198,10 +209,8 @@ public class MovieDetailActivity extends AppCompatActivity implements LoaderCall
                 String LANGUAGE = "language";
                 String PAGE = "page";
 
-                //api_key=29b5c38bd9cb290af42a02bf51e15193&language=en-US&sort_by=popularity.desc&page=1
                 //https://api.themoviedb.org/3/movie/popular?api_key=<<api_key>>&language=en-US
                 //https://api.themoviedb.org/3/movie/top_rated?api_key=<<api_key>>&language=en-US
-
                 String language = "en-US";
 
                 String jsonStr;
@@ -255,7 +264,6 @@ public class MovieDetailActivity extends AppCompatActivity implements LoaderCall
                     return null;
                 }
                 jsonStr = buffer.toString();
-
                 return jsonStr;
             }
 
@@ -311,10 +319,8 @@ public class MovieDetailActivity extends AppCompatActivity implements LoaderCall
         if (data != null) {
             mMovie.setTrailers(data.getTrailers());
             mMovie.setReviews(data.getReviews());
-            mReviewAdapter.clear();
-            mTrailerAdapter.clear();
-            mReviewAdapter.addAll(data.getReviews());
-            mTrailerAdapter.addAll(data.getTrailers());
+            Log.v(TAG, "Movie data set");
+            updateUI();        //Updating data
         }
     }
 
