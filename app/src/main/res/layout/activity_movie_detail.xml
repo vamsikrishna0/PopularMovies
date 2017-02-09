@@ -6,6 +6,7 @@
     android:layout_height="match_parent"
     android:padding="@dimen/activity_vertical_margin"
     android:orientation="vertical"
+    android:scrollbars="none"
     tools:context="com.example.android.popularmovies.MovieDetailActivity">
 
     <LinearLayout

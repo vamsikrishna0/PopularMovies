@@ -13,9 +13,11 @@ import net.simonvt.schematic.annotation.PrimaryKey;
 
 public interface MovieColumns {
     @DataType(Type.INTEGER) @PrimaryKey
-    @AutoIncrement
     String _ID = "_id";
 
     @DataType(Type.TEXT) @NotNull
     String TITLE = "title";
+
+    @DataType(Type.TEXT) @NotNull
+    String IMAGE_URI = "image";
 }

@@ -8,5 +8,6 @@
         android:id="@+id/thumbnail_main"
         android:layout_gravity="bottom"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="match_parent"
+        android:contentDescription="@string/movie_image" />
 </LinearLayout>

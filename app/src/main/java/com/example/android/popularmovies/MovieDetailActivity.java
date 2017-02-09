@@ -88,17 +88,17 @@ public class MovieDetailActivity extends AppCompatActivity implements LoaderCall
             TextView textView = new TextView(this);
             textView.setText(review);
             textView.setLayoutParams(layoutParams);
-            Log.v(TAG, "Reviews set");
+//            Log.v(TAG, "Reviews set");
             mReviewsView.addView(textView);
         }
         for(final Trailer trailer: mMovie.getTrailers()){
             TextView trailerText = new TextView(this);
             trailerText.setText(trailer.getName());
             trailerText.setTextSize(26);
-            trailerText.setTextColor(getResources().getColor(R.color.colorPrimary));
+            trailerText.setTextColor(getResources().getColor(R.color.primary));
             trailerText.setPadding(20, 0, 0, 4);
             trailerText.setLayoutParams(layoutParams);
-            Log.v(TAG, trailer.getName());
+//            Log.v(TAG, trailer.getName());
             trailerText.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
@@ -107,7 +107,6 @@ public class MovieDetailActivity extends AppCompatActivity implements LoaderCall
                     if(appIntent.resolveActivity(getPackageManager()) != null){
                         startActivity(appIntent);
                     }
-
                 }
             });
             mTrailersView.addView(trailerText);
@@ -127,13 +126,12 @@ public class MovieDetailActivity extends AppCompatActivity implements LoaderCall
         final FloatingActionButton fabButton = (FloatingActionButton) findViewById(R.id.fab);
         ContentResolver resolver = getContentResolver();
         Cursor cursor = resolver.query(FavouriteContentProvider.Lists.withId(Long.parseLong(mMovie.getId())), null,
-                MovieColumns._ID + " = " + Integer.parseInt(mMovie.getId()), null, null);
-        setFab(fabButton, cursor == null);
-        if (cursor != null){
-            Log.v(TAG, cursor.getColumnName(0));
+                null, null, null);
+        boolean status = (cursor != null && cursor.moveToFirst());
+        setFab(fabButton, status);
+        fabButton.setTag(status);
+        if(cursor != null)
             cursor.close();
-        }
-
         fabButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -141,19 +139,24 @@ public class MovieDetailActivity extends AppCompatActivity implements LoaderCall
                 //False - not fav yet
                 ContentResolver resolver = getContentResolver();
                 if ((boolean) fabButton.getTag()) {
-                    int p = resolver.delete(FavouriteContentProvider.Lists.withId(Long.parseLong(mMovie.getId())),
-                            MovieColumns._ID + " = " + Integer.parseInt(mMovie.getId()), null);
-                    if (p > 0)
-                        Log.v(TAG, "deleted");
-                    setFab(fabButton, false);
+                    int p = resolver.delete(FavouriteContentProvider.Lists.withId(Long.parseLong(mMovie.getId())), null, null);
+                    if (p > 0) {
+                        setFab(fabButton, false);
+                        fabButton.setTag(false);
+//                        Log.v(TAG, "Delete success"+mMovie.getId());
+                    }
                 } else {
                     ContentValues cv = new ContentValues();
                     cv.put(MovieColumns._ID, Integer.parseInt(mMovie.getId()));
                     cv.put(MovieColumns.TITLE, mMovie.getOriginalTitle());
-                    Uri p = resolver.insert(FavouriteContentProvider.Lists.withId(Long.parseLong(mMovie.getId())), cv);
-                    if (p != null)
-                        Log.v(TAG, "inserted");
-                    setFab(fabButton, true);
+                    cv.put(MovieColumns.IMAGE_URI, mMovie.getImageUri());
+                    Uri p = resolver.insert(FavouriteContentProvider.Lists.LISTS, cv);
+
+                    if (p != null){
+                        setFab(fabButton, true);
+                        fabButton.setTag(true);
+//                        Log.v(TAG, "Insert success"+mMovie.getId());
+                    }
                 }
             }
         });
@@ -161,11 +164,9 @@ public class MovieDetailActivity extends AppCompatActivity implements LoaderCall
     public static void setFab(FloatingActionButton fab, boolean status) {
         if (status) {
             fab.setImageResource(R.drawable.ic_star_black);
-
         } else {
             fab.setImageResource(R.drawable.ic_star_border_black);
         }
-        fab.setTag(status);
     }
 
     @Override
@@ -189,7 +190,7 @@ public class MovieDetailActivity extends AppCompatActivity implements LoaderCall
                 if (mData == null) {
                     mData = new MovieDetail();
                     forceLoad();
-                    Log.v(TAG, "loaded data");
+//                    Log.v(TAG, "loaded data");
                 } else
                     deliverResult(mData);
 
@@ -237,7 +238,7 @@ public class MovieDetailActivity extends AppCompatActivity implements LoaderCall
                 BufferedReader reader;
 
                 URL url = new URL(uri.toString());
-                Log.e("MovieFragment:fetchdata", uri.toString());
+//                Log.e("MovieFragment:fetchdata", uri.toString());
 
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setRequestMethod("GET");
@@ -283,7 +284,7 @@ public class MovieDetailActivity extends AppCompatActivity implements LoaderCall
                     //Getting the reviews with an api call
                     ArrayList<String> reviews = new ArrayList<>();
                     String reviewsStr = fetchData(REVIEWS, id);
-                    Log.v("MovieFragment:getList", reviewsStr);
+//                    Log.v("MovieFragment:getList", reviewsStr);
                     JSONArray reviewsArray = new JSONObject(reviewsStr).getJSONArray(RESULTS);
                     for (int j = 0; j < reviewsArray.length(); j++) {
                         JSONObject review = reviewsArray.getJSONObject(j);
@@ -296,7 +297,7 @@ public class MovieDetailActivity extends AppCompatActivity implements LoaderCall
                     //Getting the trailers data with an api call
                     ArrayList<Trailer> trailers = new ArrayList<>();
                     String trailersStr = fetchData(TRAILERS, id);
-                    Log.v("MovieFragment:getList", trailersStr);
+//                    Log.v("MovieFragment:getList", trailersStr);
                     JSONArray trailersArray = new JSONObject(trailersStr).getJSONArray("youtube");
                     for (int j = 0; j < trailersArray.length(); j++) {
                         JSONObject tr = trailersArray.getJSONObject(j);
@@ -319,7 +320,7 @@ public class MovieDetailActivity extends AppCompatActivity implements LoaderCall
         if (data != null) {
             mMovie.setTrailers(data.getTrailers());
             mMovie.setReviews(data.getReviews());
-            Log.v(TAG, "Movie data set");
+//            Log.v(TAG, "Movie data set");
             updateUI();        //Updating data
         }
     }

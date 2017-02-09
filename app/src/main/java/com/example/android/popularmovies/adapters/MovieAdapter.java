@@ -19,8 +19,8 @@ import java.util.List;
 
 public class MovieAdapter extends ArrayAdapter<Movie> implements Serializable {
 
-    final String imageBaseUri = "http://image.tmdb.org/t/p/w185/";
-    final String DETAIL = "detail";
+    private final static String IMAGE_BASE_URI = "http://image.tmdb.org/t/p/w185/";
+    private static final String DETAIL = "detail";
 
     public MovieAdapter(Context context, List<Movie> objects) {
         super(context, 0, objects);
@@ -35,7 +35,7 @@ public class MovieAdapter extends ArrayAdapter<Movie> implements Serializable {
         final Movie movie = getItem(position);
         final ImageView thumbnail = (ImageView) convertView.findViewById(R.id.thumbnail_main);
 
-        Picasso.with(getContext()).load(imageBaseUri + movie.getImageUri()).resize(350, 280).into(thumbnail);
+        Picasso.with(getContext()).load(IMAGE_BASE_URI + movie.getImageUri()).resize(350, 280).into(thumbnail);
         thumbnail.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {

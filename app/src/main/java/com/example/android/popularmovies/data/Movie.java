@@ -17,7 +17,8 @@ public class Movie implements Serializable {
     private ArrayList<Trailer> trailers;
     private ArrayList<String> reviews;
 
-    public Movie(String id, String originalTitle, String imageUri, String overview, double voteAverage, Date releaseDate, double popularity) {
+    public Movie(String id, String originalTitle, String imageUri, String overview,
+                 double voteAverage, Date releaseDate, double popularity) {
         this.originalTitle = originalTitle;
         this.imageUri = imageUri;
         this.overview = overview;
@@ -27,6 +28,11 @@ public class Movie implements Serializable {
         this.id = id;
         trailers = new ArrayList<>();
         reviews = new ArrayList<>();
+    }
+    public Movie(String id, String originalTitle, String imageUri){
+        this.originalTitle = originalTitle;
+        this.imageUri = imageUri;
+        this.id = id;
     }
 
     public String getOriginalTitle() {
