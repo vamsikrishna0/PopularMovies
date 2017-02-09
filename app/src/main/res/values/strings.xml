@@ -1,12 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Popular Movies</string>
-
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="action_sort_order">Sort By</string>
 
     <string name="pref_sort_order_label">Sort By</string>
-    <string name="pref_popularity">popular</string>
-    <string name="pref_top_rated">top_rated</string>
-    <string name="pref_toggle_sort">Toggle Sort By</string>
+
+    <string name="pref_sort_key">order</string>
+
+    <string name="settings">Settings</string>
+
+    <string name="pref_sort_order_default">popular</string>
+    <string name="favorites">favorites</string>
 </resources>

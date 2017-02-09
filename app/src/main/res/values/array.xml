@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <array name="pref_sort_order_entryValues">
+        <item name="pref_popularity">popular</item>
+        <item name="pref_top_rated">top_rated</item>
+        <item name="pref_favorites">favorites</item>
+    </array>
+    <array name="pref_sort_order_entries">
+        <item name="pref_popularity_str">Popularity</item>
+        <item name="pref_top_rated_str">Highest Rated</item>
+        <item name="pref_favourites_str">Favourites</item>
+    </array>
+
+</resources>

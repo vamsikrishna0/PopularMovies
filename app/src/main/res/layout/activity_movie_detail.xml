@@ -1,46 +1,77 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/activity_movie_detail"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:padding="@dimen/activity_vertical_margin"
+    android:orientation="vertical"
+    android:fillViewport="true"
     tools:context="com.example.android.popularmovies.MovieDetailActivity">
 
-    <LinearLayout
-        android:orientation="vertical"
+    <TextView
+        android:id="@+id/detail_original_title"
+        style="@style/Title"
+        android:paddingBottom="10dp"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
-        <TextView
-            android:id="@+id/detail_original_title"
-            style="@style/Title"
-            android:paddingBottom="10dp"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+        android:layout_height="wrap_content" />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:orientation="horizontal"
+        android:layout_height="wrap_content">
         <ImageView
+            android:contentDescription="movie image"
             android:id="@+id/detail_poster"
-            android:layout_width="match_parent"
+            android:layout_gravity="start"
+            android:foregroundGravity="left"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:paddingBottom="10dp"/>
-        <TextView
-            style="@style/Detail"
-            android:paddingBottom="10dp"
-            android:id="@+id/detail_overview"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-        <TextView
-            style="@style/Detail"
-            android:paddingBottom="10dp"
-            android:id="@+id/detail_vote_average"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-        <TextView
-            style="@style/Detail"
-            android:paddingBottom="10dp"
-            android:id="@+id/detail_release_date"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/fab"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top|start"
+            android:layout_margin="@dimen/fab_margin"
+            android:src="@drawable/ic_star_border_black"
+            android:tint="@android:color/white"/>
     </LinearLayout>
 
-</ScrollView>
+    <TextView
+        style="@style/Detail"
+        android:paddingBottom="10dp"
+        android:id="@+id/detail_overview"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+    <TextView
+        style="@style/Detail"
+        android:paddingBottom="10dp"
+        android:id="@+id/detail_vote_average"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+    <TextView
+        style="@style/Detail"
+        android:paddingBottom="10dp"
+        android:id="@+id/detail_release_date"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        style="@style/Detail"
+        android:text="Trailers" />
+    <ListView
+        android:id="@+id/detail_trailers_listview"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        style="@style/Detail"
+        android:text="Reviews" />
+    <ListView
+        android:id="@+id/detail_reviews_listview"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+</LinearLayout>
